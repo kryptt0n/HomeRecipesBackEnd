@@ -1,7 +1,7 @@
-package com.vitalysukhinin.HomeRecipes.controllers;
+package com.vitalysukhinin.homerecipes.controllers;
 
-import com.example.demo.entities.Product;
-import com.example.demo.repositories.ProductRepository;
+import com.vitalysukhinin.homerecipes.entities.Product;
+import com.vitalysukhinin.homerecipes.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/products")
@@ -35,8 +36,19 @@ public class ProductController {
         }
     }
 
-    @PostMapping(path = "/add", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @CrossOrigin
+    @GetMapping("/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable Integer id) {
+        Optional<Product> found = productRepository.findById(id);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        if (found.isPresent()) {
+            return ResponseEntity.ok(found.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping
+//    @CrossOrigin
     public ResponseEntity<Product> addProduct(@RequestBody Product product) {
         Product savedProduct = productRepository.save(product);
         HttpHeaders responseHeaders = new HttpHeaders();

@@ -1,4 +1,4 @@
-package com.vitalysukhinin.HomeRecipes.entities;
+package com.vitalysukhinin.homerecipes.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;

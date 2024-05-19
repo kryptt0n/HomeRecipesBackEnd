@@ -1,4 +1,4 @@
-package com.vitalysukhinin.HomeRecipes;
+package com.vitalysukhinin.homerecipes;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

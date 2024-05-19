@@ -1,7 +1,7 @@
-package com.vitalysukhinin.HomeRecipes.repositories;
+package com.vitalysukhinin.homerecipes.repositories;
 
-import com.example.demo.entities.Dish;
-import com.example.demo.entities.User;
+import com.vitalysukhinin.homerecipes.entities.Dish;
+import com.vitalysukhinin.homerecipes.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,4 +1,4 @@
-package com.vitalysukhinin.HomeRecipes.entities;
+package com.vitalysukhinin.homerecipes.entities;
 
 import jakarta.persistence.*;
 

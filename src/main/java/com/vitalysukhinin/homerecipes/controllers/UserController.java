@@ -1,13 +1,14 @@
-package com.vitalysukhinin.HomeRecipes.controllers;
+package com.vitalysukhinin.homerecipes.controllers;
 
-import com.example.demo.entities.Dish;
-import com.example.demo.entities.User;
-import com.example.demo.repositories.DishRepository;
-import com.example.demo.repositories.UserRepository;
+import com.vitalysukhinin.homerecipes.entities.Dish;
+import com.vitalysukhinin.homerecipes.entities.User;
+import com.vitalysukhinin.homerecipes.repositories.DishRepository;
+import com.vitalysukhinin.homerecipes.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,5 +49,25 @@ public class UserController {
             return new ResponseEntity<>(dishRepository.findAllByUser(currentUser.get()), HttpStatus.OK);
         else
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping("/{id}/dishes")
+    public ResponseEntity<Dish> addUserDish(@PathVariable Integer id, @RequestBody Dish dish) {
+        Optional<User> currentUser = userRepository.findById(id);
+        if (currentUser.isPresent()) {
+            dish.setUser(currentUser.get());
+            dish.setId(null);
+            dishRepository.save(dish);
+            return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                    .buildAndExpand(dish.getId()).toUri()).build();
+        }
+        else
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    }
+
+    @PutMapping("/{id}/dishes")
+    public ResponseEntity<Dish> putUserDish(@PathVariable Integer id, @RequestBody Dish dish) {
+        dishRepository.save(dish);
+        return ResponseEntity.ok(dish);
     }
 }

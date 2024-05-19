@@ -1,4 +1,4 @@
-package com.vitalysukhinin.HomeRecipes.configs;
+package com.vitalysukhinin.homerecipes.configs;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

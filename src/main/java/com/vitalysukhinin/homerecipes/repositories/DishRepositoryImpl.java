@@ -1,4 +1,4 @@
-package com.vitalysukhinin.HomeRecipes.repositories;
+package com.vitalysukhinin.homerecipes.repositories;
 
 //public class DishRepositoryImpl implements CustomizedDishRepository{
 //

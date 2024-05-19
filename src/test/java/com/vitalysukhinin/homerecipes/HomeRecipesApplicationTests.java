@@ -1,4 +1,4 @@
-package com.vitalysukhinin.HomeRecipes;
+package com.vitalysukhinin.homerecipes;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

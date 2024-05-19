@@ -1,5 +1,6 @@
-package com.vitalysukhinin.HomeRecipes.entities;
+package com.vitalysukhinin.homerecipes.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -12,7 +13,11 @@ public class User {
     private Integer id;
 
     private String username;
+
+    @JsonIgnore
     private String password;
+
+    @JsonIgnore
     private String email;
 
 

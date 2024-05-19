@@ -1,7 +1,7 @@
-package com.vitalysukhinin.HomeRecipes.controllers;
+package com.vitalysukhinin.homerecipes.controllers;
 
-import com.example.demo.entities.Dish;
-import com.example.demo.repositories.DishRepository;
+import com.vitalysukhinin.homerecipes.entities.Dish;
+import com.vitalysukhinin.homerecipes.repositories.DishRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,5 +36,11 @@ public class DishController {
     public ResponseEntity<Dish> addDish(@RequestBody Dish dish) {
         Dish saved = dishRepository.save(dish);
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Dish> deleteDish(@PathVariable Integer id) {
+        dishRepository.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 }
