@@ -42,9 +42,9 @@ public class UserController {
         }
     }
 
-    @GetMapping("/{id}/dishes")
-    public ResponseEntity<List<Dish>> allUserDishes(@PathVariable Integer id) {
-        Optional<User> currentUser = userRepository.findById(id);
+    @GetMapping("/{username}/dishes")
+    public ResponseEntity<List<Dish>> allUserDishes(@PathVariable String username) {
+        Optional<User> currentUser = userRepository.findByUsername(username);
         if (currentUser.isPresent())
             return new ResponseEntity<>(dishRepository.findAllByUser(currentUser.get()), HttpStatus.OK);
         else

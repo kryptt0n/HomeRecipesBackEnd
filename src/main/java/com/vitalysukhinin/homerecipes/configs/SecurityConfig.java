@@ -35,13 +35,19 @@ public class SecurityConfig {
         var userDetailsService =
                 new InMemoryUserDetailsManager();
 
-        var user = User.withUsername("user")
-                .password("{noop}password")
+        createUser("user", "password", userDetailsService);
+        createUser("test1", "test1", userDetailsService);
+        createUser("test2", "test2", userDetailsService);
+
+        return userDetailsService;
+    }
+
+    private void createUser(String username, String password, UserDetailsManager manager) {
+        var user = User.withUsername(username)
+                .password("{noop}" + password)
                 .authorities("Test")
                 .build();
 
-        userDetailsService.createUser(user);
-
-        return userDetailsService;
+        manager.createUser(user);
     }
 }
