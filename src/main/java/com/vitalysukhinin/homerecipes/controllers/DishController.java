@@ -38,6 +38,12 @@ public class DishController {
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
+    @PutMapping
+    public ResponseEntity<Dish> updateDish(@RequestBody Dish dish) {
+        Dish saved = dishRepository.save(dish);
+        return new ResponseEntity<>(saved, HttpStatus.OK);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Dish> deleteDish(@PathVariable Integer id) {
         dishRepository.deleteById(id);

@@ -5,19 +5,15 @@ import jakarta.persistence.*;
 
 import java.util.Objects;
 
-@Entity
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
+
+public class UserRequest {
+
     private Integer id;
 
     private String username;
 
-    @JsonIgnore
     private String password;
 
-    @JsonIgnore
     private String email;
 
 
@@ -53,14 +49,14 @@ public class User {
         this.email = email;
     }
 
-    public User(Integer id, String username, String password, String email) {
+    public UserRequest(Integer id, String username, String password, String email) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
     }
 
-    public User() {}
+    public UserRequest() {}
 
     @Override
     public String toString() {
@@ -76,7 +72,7 @@ public class User {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
+        UserRequest user = (UserRequest) o;
         return id.equals(user.id) && username.equals(user.username) && password.equals(user.password) && email.equals(user.email);
     }
 

@@ -2,6 +2,8 @@ package com.vitalysukhinin.homerecipes.controllers;
 
 import com.vitalysukhinin.homerecipes.entities.Dish;
 import com.vitalysukhinin.homerecipes.entities.User;
+import com.vitalysukhinin.homerecipes.entities.UserRequest;
+import com.vitalysukhinin.homerecipes.entities.UserResponse;
 import com.vitalysukhinin.homerecipes.repositories.DishRepository;
 import com.vitalysukhinin.homerecipes.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,16 +29,36 @@ public class UserController {
         this.userRepository = userRepository;
     }
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<List<User>> allUsers() {
-        return new ResponseEntity<>(userRepository.findAll(), HttpStatus.OK);
+        List<User> users = userRepository.findAll();
+        users.forEach(user -> {
+            user.setPassword(null);
+            user.setEmail(null);
+        });
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<User> userById(@PathVariable Integer id) {
-        Optional<User> found = userRepository.findById(id);
+    @PostMapping
+    public ResponseEntity<User> createUser(@RequestBody UserRequest user) {
+        User savedUser = new User(
+                user.getId(),
+                user.getUsername(),
+                user.getPassword(),
+                user.getEmail()
+        );
+        userRepository.save(savedUser);
+        return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                .buildAndExpand(savedUser.getId()).toUri()).build();
+    }
+
+    @GetMapping("/{username}")
+    public ResponseEntity<UserResponse> userByUsername(@PathVariable String username) {
+        Optional<User> found = userRepository.findByUsername(username);
         if (found.isPresent()) {
-            return new ResponseEntity<>(found.get(), HttpStatus.OK);
+            User user = found.get();
+            UserResponse userResponse = new UserResponse(user.getId(), username);
+            return new ResponseEntity<>(userResponse, HttpStatus.OK);
         } else {
             return ResponseEntity.notFound().build();
         }
