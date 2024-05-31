@@ -20,7 +20,7 @@ public class Dish {
     private Double rating;
 
     @ManyToOne(targetEntity = User.class, fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JoinColumn(name = "user_name", referencedColumnName = "username")
     private User user;
 
     public Dish(Integer id, String name, String cookingTime, Integer servings, Double rating) {

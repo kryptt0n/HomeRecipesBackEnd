@@ -1,9 +1,7 @@
 package com.vitalysukhinin.homerecipes.controllers;
 
-import com.vitalysukhinin.homerecipes.entities.Dish;
-import com.vitalysukhinin.homerecipes.entities.User;
-import com.vitalysukhinin.homerecipes.entities.UserRequest;
-import com.vitalysukhinin.homerecipes.entities.UserResponse;
+import com.vitalysukhinin.homerecipes.entities.*;
+import com.vitalysukhinin.homerecipes.repositories.AuthorityRepository;
 import com.vitalysukhinin.homerecipes.repositories.DishRepository;
 import com.vitalysukhinin.homerecipes.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +22,13 @@ public class UserController {
     @Autowired
     UserRepository userRepository;
 
-    public UserController(DishRepository dishRepository, UserRepository userRepository) {
+    @Autowired
+    AuthorityRepository authorityRepository;
+
+    public UserController(DishRepository dishRepository, UserRepository userRepository, AuthorityRepository authorityRepository) {
         this.dishRepository = dishRepository;
         this.userRepository = userRepository;
+        this.authorityRepository = authorityRepository;
     }
 
     @GetMapping
@@ -42,14 +44,17 @@ public class UserController {
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody UserRequest user) {
         User savedUser = new User(
-                user.getId(),
                 user.getUsername(),
                 user.getPassword(),
-                user.getEmail()
+                user.getEmail(),
+                user.isEnabled()
         );
+
+        Authority authority = new Authority(user.getUsername(), "ROLE_USER");
         userRepository.save(savedUser);
+        authorityRepository.save(authority);
         return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-                .buildAndExpand(savedUser.getId()).toUri()).build();
+                .buildAndExpand(savedUser.getUsername()).toUri()).build();
     }
 
     @GetMapping("/{username}")
@@ -57,7 +62,7 @@ public class UserController {
         Optional<User> found = userRepository.findByUsername(username);
         if (found.isPresent()) {
             User user = found.get();
-            UserResponse userResponse = new UserResponse(user.getId(), username);
+            UserResponse userResponse = new UserResponse(username);
             return new ResponseEntity<>(userResponse, HttpStatus.OK);
         } else {
             return ResponseEntity.notFound().build();
@@ -73,9 +78,9 @@ public class UserController {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping("/{id}/dishes")
-    public ResponseEntity<Dish> addUserDish(@PathVariable Integer id, @RequestBody Dish dish) {
-        Optional<User> currentUser = userRepository.findById(id);
+    @PostMapping("/{username}/dishes")
+    public ResponseEntity<Dish> addUserDish(@PathVariable String username, @RequestBody Dish dish) {
+        Optional<User> currentUser = userRepository.findById(username);
         if (currentUser.isPresent()) {
             dish.setUser(currentUser.get());
             dish.setId(null);

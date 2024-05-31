@@ -6,12 +6,10 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
+@Table(name = "users")
 public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
-    private Integer id;
 
+    @Id
     private String username;
 
     @JsonIgnore
@@ -20,14 +18,8 @@ public class User {
     @JsonIgnore
     private String email;
 
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    @JsonIgnore
+    private boolean enabled;
 
     public String getUsername() {
         return username;
@@ -35,6 +27,14 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public String getPassword() {
@@ -53,11 +53,11 @@ public class User {
         this.email = email;
     }
 
-    public User(Integer id, String username, String password, String email) {
-        this.id = id;
+    public User(String username, String password, String email, boolean enabled) {
         this.username = username;
         this.password = password;
         this.email = email;
+        this.enabled = enabled;
     }
 
     public User() {}
@@ -65,8 +65,7 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
+                "username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", email='" + email + '\'' +
                 '}';
@@ -77,11 +76,11 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id.equals(user.id) && username.equals(user.username) && password.equals(user.password) && email.equals(user.email);
+        return username.equals(user.username) && password.equals(user.password) && email.equals(user.email) && ( enabled && user.enabled);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, password, email);
+        return Objects.hash(username, password, email, enabled);
     }
 }

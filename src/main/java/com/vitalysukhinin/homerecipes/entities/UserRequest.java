@@ -7,23 +7,14 @@ import java.util.Objects;
 
 
 public class UserRequest {
-
-    private Integer id;
-
     private String username;
 
     private String password;
 
     private String email;
 
+    private boolean enabled;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public String getUsername() {
         return username;
@@ -41,6 +32,14 @@ public class UserRequest {
         this.password = password;
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
     public String getEmail() {
         return email;
     }
@@ -49,11 +48,11 @@ public class UserRequest {
         this.email = email;
     }
 
-    public UserRequest(Integer id, String username, String password, String email) {
-        this.id = id;
+    public UserRequest(String username, String password, String email, boolean enabled) {
         this.username = username;
         this.password = password;
         this.email = email;
+        this.enabled = enabled;
     }
 
     public UserRequest() {}
@@ -61,10 +60,10 @@ public class UserRequest {
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
+                "username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", email='" + email + '\'' +
+                ", enabled='" + enabled + '\'' +
                 '}';
     }
 
@@ -73,11 +72,11 @@ public class UserRequest {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserRequest user = (UserRequest) o;
-        return id.equals(user.id) && username.equals(user.username) && password.equals(user.password) && email.equals(user.email);
+        return username.equals(user.username) && password.equals(user.password) && email.equals(user.email) && ( enabled && user.enabled);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, password, email);
+        return Objects.hash(username, password, email, enabled);
     }
 }

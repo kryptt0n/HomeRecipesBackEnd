@@ -1,5 +1,7 @@
 package com.vitalysukhinin.homerecipes.configs;
 
+import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -10,13 +12,15 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-import static org.springframework.aot.generate.ValueCodeGenerator.withDefaults;
+import javax.sql.DataSource;
 
 @Configuration
 @EnableWebSecurity
@@ -33,19 +37,21 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public UserDetailsService userDetailsService() {
-        var userDetailsService =
-                new InMemoryUserDetailsManager();
+//    @Bean
+//    public UserDetailsService userDetailsService() {
+//        var userDetailsService =
+//                new InMemoryUserDetailsManager();
+//
+//        createUserNoHash("user", "password", userDetailsService);
+//        createUserNoHash("test1", "test1", userDetailsService);
+//        createUserNoHash("test2", "test2", userDetailsService);
+//        createUserSHA256("test5", DigestUtils.sha256Hex("testtest"), userDetailsService);
+//        System.out.println(DigestUtils.sha256Hex("testtest"));
+//
+//        return userDetailsService;
+//    }
 
-        createUser("user", "password", userDetailsService);
-        createUser("test1", "test1", userDetailsService);
-        createUser("test2", "test2", userDetailsService);
-
-        return userDetailsService;
-    }
-
-    private void createUser(String username, String password, UserDetailsManager manager) {
+    private void createUserNoHash(String username, String password, UserDetailsManager manager) {
         var user = User.withUsername(username)
                 .password("{noop}" + password)
                 .authorities("Test")
@@ -53,4 +59,35 @@ public class SecurityConfig {
 
         manager.createUser(user);
     }
+
+    private void createUserSHA256(String username, String password, UserDetailsManager manager) {
+        var user = User.withUsername(username)
+                .password("{sha256}" + password)
+                .authorities("Test")
+                .build();
+
+        manager.createUser(user);
+    }
+
+//    @Bean
+//    DataSource dataSource() {
+//        DataSourceBuilder<?> dataSourceBuilder = DataSourceBuilder.create();
+//        dataSourceBuilder.driverClassName("com.mysql.cj.jdbc.Driver");
+//        dataSourceBuilder.url("jdbc:mysql://54.235.224.83/home_recipes");
+//        dataSourceBuilder.username("vitaly");
+//        dataSourceBuilder.password("vitalysukhinin");
+//        return dataSourceBuilder.build();
+//    }
+
+    @Bean
+    UserDetailsManager userDetailsManager(DataSource dataSource) {
+        return new JdbcUserDetailsManager(dataSource);
+    }
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new Sha256PasswordEncoder();
+    }
+
+
 }
