@@ -2,6 +2,8 @@ package com.vitalysukhinin.homerecipes.entities;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 public class Product {
 
@@ -11,6 +13,9 @@ public class Product {
     private Integer id;
 
     private String name;
+
+    @ManyToMany(mappedBy = "products")
+    private List<Dish> dishes;
 
     public Product() {
     }

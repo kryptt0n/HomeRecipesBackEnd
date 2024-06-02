@@ -25,21 +25,10 @@ public class ProductController {
         return ResponseEntity.ok(productRepository.findAll());
     }
 
-    @GetMapping("/{name}")
-    public ResponseEntity<Product> getProductByName(@PathVariable String name) {
-        Product found = productRepository.findByName(name);
-        HttpHeaders responseHeaders = new HttpHeaders();
-        if (found != null) {
-            return ResponseEntity.ok().headers(responseHeaders).body(found);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable Integer id) {
         Optional<Product> found = productRepository.findById(id);
-        HttpHeaders responseHeaders = new HttpHeaders();
         if (found.isPresent()) {
             return ResponseEntity.ok(found.get());
         } else {

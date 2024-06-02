@@ -30,6 +30,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth ->
                 auth.requestMatchers(HttpMethod.POST, "/users").permitAll()
+                .requestMatchers(HttpMethod.GET, "/dishes", "/dishes/{id}/products").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .anyRequest().authenticated())
         .httpBasic(Customizer.withDefaults())
@@ -68,16 +69,6 @@ public class SecurityConfig {
 
         manager.createUser(user);
     }
-
-//    @Bean
-//    DataSource dataSource() {
-//        DataSourceBuilder<?> dataSourceBuilder = DataSourceBuilder.create();
-//        dataSourceBuilder.driverClassName("com.mysql.cj.jdbc.Driver");
-//        dataSourceBuilder.url("jdbc:mysql://54.235.224.83/home_recipes");
-//        dataSourceBuilder.username("vitaly");
-//        dataSourceBuilder.password("vitalysukhinin");
-//        return dataSourceBuilder.build();
-//    }
 
     @Bean
     UserDetailsManager userDetailsManager(DataSource dataSource) {

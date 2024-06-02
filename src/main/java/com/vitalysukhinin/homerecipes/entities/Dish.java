@@ -3,6 +3,8 @@ package com.vitalysukhinin.homerecipes.entities;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Dish {
@@ -23,12 +25,21 @@ public class Dish {
     @JoinColumn(name = "user_name", referencedColumnName = "username")
     private User user;
 
-    public Dish(Integer id, String name, String cookingTime, Integer servings, Double rating) {
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JoinTable(
+            name = "product_dish",
+            joinColumns = {@JoinColumn(name = "dish_id")},
+            inverseJoinColumns = {@JoinColumn(name = "product_id")}
+    )
+    private List<Product> products;
+
+    public Dish(Integer id, String name, String cookingTime, Integer servings, Double rating, List<Product> products) {
         this.id = id;
         this.name = name;
         this.cookingTime = cookingTime;
         this.servings = servings;
         this.rating = rating;
+        this.products = products;
     }
 
     public Dish() {
@@ -80,6 +91,14 @@ public class Dish {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
     }
 
     @Override
