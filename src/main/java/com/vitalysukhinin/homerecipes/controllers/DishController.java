@@ -1,5 +1,6 @@
 package com.vitalysukhinin.homerecipes.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vitalysukhinin.homerecipes.entities.Dish;
 import com.vitalysukhinin.homerecipes.entities.Product;
 import com.vitalysukhinin.homerecipes.repositories.DishRepository;
@@ -8,10 +9,19 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +37,8 @@ public class DishController {
 
     @PersistenceContext
     EntityManager entityManager;
+
+    private static final String UPLOAD_DIR = "images/";
 
     @GetMapping
     public ResponseEntity<List<Dish>> allDishes() {
@@ -44,6 +56,23 @@ public class DishController {
         }
     }
 
+    @GetMapping("/{id}/image")
+    public ResponseEntity<Resource> dishImage(@PathVariable Integer id) throws MalformedURLException {
+        Optional<Dish> found = dishRepository.findById(id);
+        if (found.isPresent()) {
+            Dish dish = found.get();
+            Path path = Paths.get(dish.getImageUrl());
+            if (Files.exists(path)) {
+                Resource resource = new UrlResource(path.toUri());
+                return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @GetMapping("/{id}/products")
     public ResponseEntity<List<Product>> productsForDish(@PathVariable Integer id) {
         Optional<Dish> found = dishRepository.findById(id);
@@ -55,9 +84,25 @@ public class DishController {
     }
 
     @PostMapping
-    public ResponseEntity<Dish> addDish(@RequestBody Dish dish) {
-        Dish saved = dishRepository.save(dish);
-        return new ResponseEntity<>(saved, HttpStatus.CREATED);
+    @Transactional
+    public ResponseEntity<Dish> addDish(@RequestParam("dish") String dishJson, @RequestParam("image") MultipartFile imageFile) {
+        try {
+            if (!imageFile.isEmpty()) {
+                byte[] bytes = imageFile.getBytes();
+                Path path = Paths.get(UPLOAD_DIR + "dish" + 1);
+                System.out.println(path);
+                Files.write(path, bytes);
+            }
+
+            Dish dish = new ObjectMapper().readValue(dishJson, Dish.class);
+            Dish saved = dishRepository.save(dish);
+            saved.setImageUrl(UPLOAD_DIR + "dish" + saved.getId());
+            dishRepository.save(saved);
+
+            return new ResponseEntity<>(new Dish(), HttpStatus.CREATED);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping

@@ -21,6 +21,12 @@ public class Dish {
     private Integer servings;
     private Double rating;
 
+    @Column(length = 2000)
+    private String description;
+
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @ManyToOne(targetEntity = User.class, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_name", referencedColumnName = "username")
     private User user;
@@ -33,12 +39,14 @@ public class Dish {
     )
     private List<Product> products;
 
-    public Dish(Integer id, String name, String cookingTime, Integer servings, Double rating, List<Product> products) {
+    public Dish(Integer id, String name, String cookingTime, Integer servings, Double rating, String description, String imageUrl, List<Product> products) {
         this.id = id;
         this.name = name;
         this.cookingTime = cookingTime;
         this.servings = servings;
         this.rating = rating;
+        this.description = description;
+        this.imageUrl = imageUrl;
         this.products = products;
     }
 
@@ -51,6 +59,22 @@ public class Dish {
 
     public String getName() {
         return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public void setId(Integer id) {
