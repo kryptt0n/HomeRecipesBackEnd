@@ -61,7 +61,10 @@ public class DishController {
         Optional<Dish> found = dishRepository.findById(id);
         if (found.isPresent()) {
             Dish dish = found.get();
-            Path path = Paths.get(dish.getImageUrl());
+            //TODO: Change path from /images to /home/ubuntu/images
+            //TODO: Change images resolution to display properly on mobile phones
+            Path path = Paths.get("/home/ubuntu/" + dish.getImageUrl());
+            System.out.println("Resolved path: " + path.toAbsolutePath());
             if (Files.exists(path)) {
                 Resource resource = new UrlResource(path.toUri());
                 return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(resource);
@@ -87,20 +90,22 @@ public class DishController {
     @Transactional
     public ResponseEntity<Dish> addDish(@RequestParam("dish") String dishJson, @RequestParam("image") MultipartFile imageFile) {
         try {
-            if (!imageFile.isEmpty()) {
-                byte[] bytes = imageFile.getBytes();
-                Path path = Paths.get(UPLOAD_DIR + "dish" + 1);
-                System.out.println(path);
-                Files.write(path, bytes);
-            }
 
             Dish dish = new ObjectMapper().readValue(dishJson, Dish.class);
             Dish saved = dishRepository.save(dish);
+            if (!imageFile.isEmpty()) {
+                byte[] bytes = imageFile.getBytes();
+                Path path = Paths.get("/home/ubuntu/" + UPLOAD_DIR + "dish" + saved.getId());
+                System.out.println(path);
+                Files.write(path, bytes);
+                System.out.println("Files were written");
+            }
             saved.setImageUrl(UPLOAD_DIR + "dish" + saved.getId());
             dishRepository.save(saved);
 
             return new ResponseEntity<>(new Dish(), HttpStatus.CREATED);
         } catch (IOException e) {
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
