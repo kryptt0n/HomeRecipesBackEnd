@@ -1,12 +1,16 @@
 package com.vitalysukhinin.homerecipes.entities;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import java.util.List;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Dish {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,7 +43,11 @@ public class Dish {
     )
     private List<Product> products;
 
-    public Dish(Integer id, String name, String cookingTime, Integer servings, Double rating, String description, String imageUrl, List<Product> products) {
+    @OneToMany(mappedBy = "dish", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER, orphanRemoval = true)
+    private List<Steps> steps;
+
+    public Dish(Integer id, String name, String cookingTime, Integer servings, Double rating,
+                String description, String imageUrl, List<Product> products, List<Steps> steps) {
         this.id = id;
         this.name = name;
         this.cookingTime = cookingTime;
@@ -48,6 +56,7 @@ public class Dish {
         this.description = description;
         this.imageUrl = imageUrl;
         this.products = products;
+        this.steps = steps;
     }
 
     public Dish() {
@@ -125,11 +134,27 @@ public class Dish {
         this.products = products;
     }
 
+    public List<Steps> getSteps() {
+        return steps;
+    }
+
+    public void setSteps(List<Steps> steps) {
+        this.steps = steps;
+    }
+
     @Override
     public String toString() {
         return "Dish{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
+                ", cookingTime='" + cookingTime + '\'' +
+                ", servings=" + servings +
+                ", rating=" + rating +
+                ", description='" + description + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", user=" + user +
+                ", products=" + products +
+                ", steps=" + steps +
                 '}';
     }
 }

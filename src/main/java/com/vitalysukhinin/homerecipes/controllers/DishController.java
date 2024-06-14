@@ -3,6 +3,7 @@ package com.vitalysukhinin.homerecipes.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vitalysukhinin.homerecipes.entities.Dish;
 import com.vitalysukhinin.homerecipes.entities.Product;
+import com.vitalysukhinin.homerecipes.entities.Steps;
 import com.vitalysukhinin.homerecipes.repositories.DishRepository;
 import com.vitalysukhinin.homerecipes.repositories.ProductRepository;
 import jakarta.persistence.EntityManager;
@@ -61,9 +62,8 @@ public class DishController {
         Optional<Dish> found = dishRepository.findById(id);
         if (found.isPresent()) {
             Dish dish = found.get();
-            //TODO: Change path from /images to /home/ubuntu/images
-            //TODO: Change images resolution to display properly on mobile phones
-            Path path = Paths.get("/home/ubuntu/" + dish.getImageUrl());
+//            Path path = Paths.get("/home/ubuntu/" + dish.getImageUrl());
+            Path path = Paths.get(System.getProperty("user.dir")).resolve(dish.getImageUrl());
             System.out.println("Resolved path: " + path.toAbsolutePath());
             if (Files.exists(path)) {
                 Resource resource = new UrlResource(path.toUri());
@@ -71,6 +71,16 @@ public class DishController {
             } else {
                 return ResponseEntity.notFound().build();
             }
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{id}/steps")
+    public ResponseEntity<List<Steps>> stepsForDish(@PathVariable Integer id) {
+        Optional<Dish> found = dishRepository.findById(id);
+        if (found.isPresent()) {
+            return new ResponseEntity<>(found.get().getSteps(), HttpStatus.OK);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -95,7 +105,8 @@ public class DishController {
             Dish saved = dishRepository.save(dish);
             if (!imageFile.isEmpty()) {
                 byte[] bytes = imageFile.getBytes();
-                Path path = Paths.get("/home/ubuntu/" + UPLOAD_DIR + "dish" + saved.getId());
+//                Path path = Paths.get("/home/ubuntu/" + UPLOAD_DIR + "dish" + saved.getId());
+                Path path = Paths.get(UPLOAD_DIR + "dish" + saved.getId());
                 System.out.println(path);
                 Files.write(path, bytes);
                 System.out.println("Files were written");
