@@ -1,6 +1,5 @@
 package com.vitalysukhinin.homerecipes.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vitalysukhinin.homerecipes.entities.Dish;
 import com.vitalysukhinin.homerecipes.entities.Product;
@@ -25,6 +24,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Optional;
 
@@ -99,6 +99,12 @@ public class DishController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/{id}/rating")
+    public ResponseEntity<String> ratingForDish(@PathVariable Integer id) {
+        return ResponseEntity.ok(new DecimalFormat("#.#")
+                .format(dishRepository.findAverageRating(id)));
     }
 
     @PostMapping
