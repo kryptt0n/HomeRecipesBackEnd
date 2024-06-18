@@ -12,7 +12,7 @@ public class Steps {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "steps_id")
-    private int stepsId;
+    private Integer stepsId;
 
     @ManyToOne(targetEntity = Dish.class)
     @JoinColumn(name = "dish_id", nullable = false)
@@ -32,7 +32,7 @@ public class Steps {
 
     public Steps() {}
 
-    public int getStepsId() {
+    public Integer getStepsId() {
         return stepsId;
     }
 

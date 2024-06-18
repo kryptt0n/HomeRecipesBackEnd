@@ -1,11 +1,13 @@
 package com.vitalysukhinin.homerecipes.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vitalysukhinin.homerecipes.entities.Dish;
 import com.vitalysukhinin.homerecipes.entities.Product;
 import com.vitalysukhinin.homerecipes.entities.Steps;
 import com.vitalysukhinin.homerecipes.repositories.DishRepository;
 import com.vitalysukhinin.homerecipes.repositories.ProductRepository;
+import com.vitalysukhinin.homerecipes.repositories.StepRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -39,6 +41,9 @@ public class DishController {
     @PersistenceContext
     EntityManager entityManager;
 
+    @Autowired
+    StepRepository stepRepository;
+
     private static final String UPLOAD_DIR = "images/";
 
     @GetMapping
@@ -64,7 +69,7 @@ public class DishController {
             Dish dish = found.get();
 //            Path path = Paths.get("/home/ubuntu/" + dish.getImageUrl());
             Path path = Paths.get(System.getProperty("user.dir")).resolve(dish.getImageUrl());
-            System.out.println("Resolved path: " + path.toAbsolutePath());
+//            System.out.println("Resolved path: " + path.toAbsolutePath());
             if (Files.exists(path)) {
                 Resource resource = new UrlResource(path.toUri());
                 return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(resource);
@@ -123,7 +128,8 @@ public class DishController {
 
     @PutMapping
     @Transactional
-    public ResponseEntity<Dish> updateDish(@RequestBody Dish dish) {
+    public ResponseEntity<Dish> updateDish(@RequestParam("dish") String dishJson, @RequestParam("image") MultipartFile imageFile) throws IOException {
+        Dish dish = new ObjectMapper().readValue(dishJson, Dish.class);
         entityManager.detach(dish);
 
         List<Product> products = dish.getProducts();
@@ -138,7 +144,32 @@ public class DishController {
                 products.set(i, product);
             }
         }
+
+        List<Steps> steps = dish.getSteps();
+        for (int i = 0; i < steps.size(); i++) {
+            Steps step = steps.get(i);
+            if (step.getStepsId() == null) {
+                // New step
+                stepRepository.save(step);
+            } else {
+                // Existing step
+                step = entityManager.merge(step);
+                steps.set(i, step);
+            }
+        }
+
+        if (!imageFile.isEmpty()) {
+            byte[] bytes = imageFile.getBytes();
+//                Path path = Paths.get("/home/ubuntu/" + UPLOAD_DIR + "dish" + saved.getId());
+            Path path = Paths.get(UPLOAD_DIR + "dish" + dish.getId());
+            System.out.println(path);
+            Files.write(path, bytes);
+            System.out.println("Files were written");
+            dish.setImageUrl(UPLOAD_DIR + "dish" + dish.getId());
+        }
+
         dish.setProducts(products);
+        dish.setSteps(steps);
         Dish saved = entityManager.merge(dish);
         return new ResponseEntity<>(saved, HttpStatus.OK);
     }
