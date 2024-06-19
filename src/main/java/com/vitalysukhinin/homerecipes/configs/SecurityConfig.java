@@ -23,7 +23,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth ->
                 auth.requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/dishes", "/api/dishes/**","/dishes/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/dishes", "/api/dishes/**","/dishes/**",
+                        "/api/users/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .anyRequest().authenticated())
         .httpBasic(Customizer.withDefaults())

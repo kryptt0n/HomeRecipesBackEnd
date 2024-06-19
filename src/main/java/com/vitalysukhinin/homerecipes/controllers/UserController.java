@@ -3,6 +3,7 @@ package com.vitalysukhinin.homerecipes.controllers;
 import com.vitalysukhinin.homerecipes.entities.*;
 import com.vitalysukhinin.homerecipes.repositories.AuthorityRepository;
 import com.vitalysukhinin.homerecipes.repositories.DishRepository;
+import com.vitalysukhinin.homerecipes.repositories.RatingRepository;
 import com.vitalysukhinin.homerecipes.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,9 @@ public class UserController {
 
     @Autowired
     AuthorityRepository authorityRepository;
+
+    @Autowired
+    RatingRepository ratingRepository;
 
     public UserController(DishRepository dishRepository, UserRepository userRepository, AuthorityRepository authorityRepository) {
         this.dishRepository = dishRepository;
@@ -76,6 +80,27 @@ public class UserController {
             return new ResponseEntity<>(dishRepository.findAllByUser(currentUser.get()), HttpStatus.OK);
         else
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/{username}/ratings/{id}")
+    public ResponseEntity<Integer> ratingForDish(@PathVariable String username, @PathVariable Integer id) {
+        Optional<User> currentUser = userRepository.findByUsername(username);
+        if (currentUser.isPresent()) {
+            Optional<Rating> rating = ratingRepository.findRatingByDishIdAndUser(id, currentUser.get());
+            return ResponseEntity.ok(rating.isPresent() ? rating.get().getRating() : 0);
+        }
+        else
+            return ResponseEntity.ok(0);
+    }
+
+    @PostMapping("/ratings")
+    public ResponseEntity<Rating> addDishRating(@RequestBody Rating rating) {
+        Optional<User> user = userRepository.findByUsername(rating.getUser().getUsername());
+        if (user.isPresent())
+            rating.setUser(user.get());
+        Rating saved = ratingRepository.save(rating);
+        return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                .buildAndExpand(saved.getDishId()).toUri()).build();
     }
 
     @PostMapping("/{username}/dishes")
