@@ -15,7 +15,7 @@ public class Steps {
     private Integer stepsId;
 
     @ManyToOne(targetEntity = Dish.class)
-    @JoinColumn(name = "dish_id", nullable = false)
+    @JoinColumn(name = "dish_id")
     private Dish dish;
 
     @Column(name = "step_number")

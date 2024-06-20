@@ -122,6 +122,14 @@ public class DishController {
                 Files.write(path, bytes);
                 System.out.println("Files were written");
             }
+
+            List<Steps> steps = dish.getSteps();
+            for (int i = 0; i < steps.size(); i++) {
+                Steps step = steps.get(i);
+                step.setDishId(saved);
+                step = entityManager.merge(step);
+                steps.set(i, step);
+            }
             saved.setImageUrl(UPLOAD_DIR + "dish" + saved.getId());
             dishRepository.save(saved);
 
