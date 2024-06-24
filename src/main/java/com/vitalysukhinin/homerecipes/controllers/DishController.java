@@ -103,8 +103,13 @@ public class DishController {
 
     @GetMapping("/{id}/rating")
     public ResponseEntity<String> ratingForDish(@PathVariable Integer id) {
-        return ResponseEntity.ok(new DecimalFormat("#.#")
-                .format(dishRepository.findAverageRating(id)));
+        Double rating = dishRepository.findAverageRating(id);
+        if (rating != null) {
+            return ResponseEntity.ok(new DecimalFormat("#.#")
+                    .format(dishRepository.findAverageRating(id)));
+        } else {
+            return ResponseEntity.ok("0");
+        }
     }
 
     @PostMapping
@@ -126,7 +131,7 @@ public class DishController {
             List<Steps> steps = dish.getSteps();
             for (int i = 0; i < steps.size(); i++) {
                 Steps step = steps.get(i);
-                step.setDishId(saved);
+                step.setDish(saved);
                 step = entityManager.merge(step);
                 steps.set(i, step);
             }
@@ -164,6 +169,7 @@ public class DishController {
             Steps step = steps.get(i);
             if (step.getStepsId() == null) {
                 // New step
+                step.setDish(dish);
                 stepRepository.save(step);
             } else {
                 // Existing step
@@ -174,7 +180,7 @@ public class DishController {
 
         if (!imageFile.isEmpty()) {
             byte[] bytes = imageFile.getBytes();
-//                Path path = Paths.get("/home/ubuntu/" + UPLOAD_DIR + "dish" + saved.getId());
+//                Path path = Paths.get("/home/ubuntu/" + UPLOAD_DIR + "dish" + dish.getId());
             Path path = Paths.get(UPLOAD_DIR + "dish" + dish.getId());
             System.out.println(path);
             Files.write(path, bytes);

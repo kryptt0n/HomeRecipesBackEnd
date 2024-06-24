@@ -1,6 +1,5 @@
 package com.vitalysukhinin.homerecipes.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
@@ -23,7 +22,7 @@ public class Steps {
 
     private String description;
 
-    public Steps(int stepsId, Dish dish, int stepNumber, String description) {
+    public Steps(Integer stepsId, Dish dish, int stepNumber, String description) {
         this.stepsId = stepsId;
         this.dish = dish;
         this.stepNumber = stepNumber;
@@ -36,15 +35,15 @@ public class Steps {
         return stepsId;
     }
 
-    public void setStepsId(int stepsId) {
+    public void setStepsId(Integer stepsId) {
         this.stepsId = stepsId;
     }
 
-    public Dish getDishId() {
+    public Dish getDish() {
         return dish;
     }
 
-    public void setDishId(Dish dish) {
+    public void setDish(Dish dish) {
         this.dish = dish;
     }
 
