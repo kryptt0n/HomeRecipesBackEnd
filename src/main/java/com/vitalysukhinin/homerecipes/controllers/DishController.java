@@ -1,9 +1,11 @@
 package com.vitalysukhinin.homerecipes.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vitalysukhinin.homerecipes.entities.Comment;
 import com.vitalysukhinin.homerecipes.entities.Dish;
 import com.vitalysukhinin.homerecipes.entities.Product;
 import com.vitalysukhinin.homerecipes.entities.Steps;
+import com.vitalysukhinin.homerecipes.repositories.CommentRepository;
 import com.vitalysukhinin.homerecipes.repositories.DishRepository;
 import com.vitalysukhinin.homerecipes.repositories.ProductRepository;
 import com.vitalysukhinin.homerecipes.repositories.StepRepository;
@@ -18,9 +20,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,6 +47,9 @@ public class DishController {
 
     @Autowired
     StepRepository stepRepository;
+
+    @Autowired
+    CommentRepository commentRepository;
 
     private static final String UPLOAD_DIR = "images/";
 
@@ -67,8 +74,8 @@ public class DishController {
         Optional<Dish> found = dishRepository.findById(id);
         if (found.isPresent()) {
             Dish dish = found.get();
-//            Path path = Paths.get("/home/ubuntu/" + dish.getImageUrl());
-            Path path = Paths.get(System.getProperty("user.dir")).resolve(dish.getImageUrl());
+            Path path = Paths.get("/home/ubuntu/" + dish.getImageUrl());
+//            Path path = Paths.get(System.getProperty("user.dir")).resolve(dish.getImageUrl());
 //            System.out.println("Resolved path: " + path.toAbsolutePath());
             if (Files.exists(path)) {
                 Resource resource = new UrlResource(path.toUri());
@@ -112,6 +119,21 @@ public class DishController {
         }
     }
 
+    @PostMapping("/{id}/comments")
+    public ResponseEntity<Comment> addCommentForDish(@PathVariable Integer id, @RequestBody Comment comment) {
+        Optional<Dish> dish = dishRepository.findById(id);
+        if (dish.isPresent()) {
+            comment.setDish(dish.get());
+            Comment savedComment = commentRepository.save(comment);
+            URI uri = URI.create(ServletUriComponentsBuilder
+                    .fromCurrentContextPath().path("/comments/" + savedComment.getId())
+                    .toUriString());
+            return ResponseEntity.created(uri).build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @PostMapping
     @Transactional
     public ResponseEntity<Dish> addDish(@RequestParam("dish") String dishJson, @RequestParam("image") MultipartFile imageFile) {
@@ -121,8 +143,8 @@ public class DishController {
             Dish saved = dishRepository.save(dish);
             if (!imageFile.isEmpty()) {
                 byte[] bytes = imageFile.getBytes();
-//                Path path = Paths.get("/home/ubuntu/" + UPLOAD_DIR + "dish" + saved.getId());
-                Path path = Paths.get(UPLOAD_DIR + "dish" + saved.getId());
+                Path path = Paths.get("/home/ubuntu/" + UPLOAD_DIR + "dish" + saved.getId());
+//                Path path = Paths.get(UPLOAD_DIR + "dish" + saved.getId());
                 System.out.println(path);
                 Files.write(path, bytes);
                 System.out.println("Files were written");
@@ -180,8 +202,8 @@ public class DishController {
 
         if (!imageFile.isEmpty()) {
             byte[] bytes = imageFile.getBytes();
-//                Path path = Paths.get("/home/ubuntu/" + UPLOAD_DIR + "dish" + dish.getId());
-            Path path = Paths.get(UPLOAD_DIR + "dish" + dish.getId());
+                Path path = Paths.get("/home/ubuntu/" + UPLOAD_DIR + "dish" + dish.getId());
+//            Path path = Paths.get(UPLOAD_DIR + "dish" + dish.getId());
             System.out.println(path);
             Files.write(path, bytes);
             System.out.println("Files were written");

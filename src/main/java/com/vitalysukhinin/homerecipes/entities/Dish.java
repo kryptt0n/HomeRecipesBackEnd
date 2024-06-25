@@ -46,6 +46,10 @@ public class Dish {
     @OneToMany(mappedBy = "dish", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Steps> steps;
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "dish_id")
+    private List<Comment> comments;
+
     public Dish(Integer id, String name, String cookingTime, Integer servings, Double rating,
                 String description, String imageUrl, List<Product> products, List<Steps> steps) {
         this.id = id;
@@ -140,6 +144,14 @@ public class Dish {
 
     public void setSteps(List<Steps> steps) {
         this.steps = steps;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
     }
 
     @Override
