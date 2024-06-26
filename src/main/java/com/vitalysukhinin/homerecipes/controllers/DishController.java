@@ -1,14 +1,8 @@
 package com.vitalysukhinin.homerecipes.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vitalysukhinin.homerecipes.entities.Comment;
-import com.vitalysukhinin.homerecipes.entities.Dish;
-import com.vitalysukhinin.homerecipes.entities.Product;
-import com.vitalysukhinin.homerecipes.entities.Steps;
-import com.vitalysukhinin.homerecipes.repositories.CommentRepository;
-import com.vitalysukhinin.homerecipes.repositories.DishRepository;
-import com.vitalysukhinin.homerecipes.repositories.ProductRepository;
-import com.vitalysukhinin.homerecipes.repositories.StepRepository;
+import com.vitalysukhinin.homerecipes.entities.*;
+import com.vitalysukhinin.homerecipes.repositories.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -51,6 +45,9 @@ public class DishController {
     @Autowired
     CommentRepository commentRepository;
 
+    @Autowired
+    UserRepository userRepository;
+
     private static final String UPLOAD_DIR = "images/";
 
     @GetMapping
@@ -74,8 +71,8 @@ public class DishController {
         Optional<Dish> found = dishRepository.findById(id);
         if (found.isPresent()) {
             Dish dish = found.get();
-            Path path = Paths.get("/home/ubuntu/" + dish.getImageUrl());
-//            Path path = Paths.get(System.getProperty("user.dir")).resolve(dish.getImageUrl());
+//            Path path = Paths.get("/home/ubuntu/" + dish.getImageUrl());
+            Path path = Paths.get(System.getProperty("user.dir")).resolve(dish.getImageUrl());
 //            System.out.println("Resolved path: " + path.toAbsolutePath());
             if (Files.exists(path)) {
                 Resource resource = new UrlResource(path.toUri());
@@ -119,16 +116,39 @@ public class DishController {
         }
     }
 
-    @PostMapping("/{id}/comments")
-    public ResponseEntity<Comment> addCommentForDish(@PathVariable Integer id, @RequestBody Comment comment) {
+    @GetMapping("/{id}/comments")
+    public ResponseEntity<List<Comment>> commentsForDish(@PathVariable Integer id) {
         Optional<Dish> dish = dishRepository.findById(id);
         if (dish.isPresent()) {
+            return ResponseEntity.ok(commentRepository.findAllByDish(dish.get()));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/comments")
+    public ResponseEntity<Comment> addCommentForDish(@RequestBody Comment comment) {
+        Optional<Dish> dish = dishRepository.findById(comment.getDish().getId());
+        if (dish.isPresent()) {
             comment.setDish(dish.get());
-            Comment savedComment = commentRepository.save(comment);
-            URI uri = URI.create(ServletUriComponentsBuilder
-                    .fromCurrentContextPath().path("/comments/" + savedComment.getId())
-                    .toUriString());
-            return ResponseEntity.created(uri).build();
+            System.out.println(comment.getUser());
+
+            if (comment.getUser() != null && comment.getUser().getUsername() == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            Optional<User> user = userRepository.findById(comment.getUser().getUsername());
+
+            if (user.isPresent()) {
+                comment.setUser(user.get());
+                Comment savedComment = commentRepository.save(comment);
+                URI uri = URI.create(ServletUriComponentsBuilder
+                        .fromCurrentContextPath().path("/comments/" + savedComment.getId())
+                        .toUriString());
+                return ResponseEntity.created(uri).build();
+            } else {
+                return ResponseEntity.badRequest().build();
+            }
+
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -143,8 +163,8 @@ public class DishController {
             Dish saved = dishRepository.save(dish);
             if (!imageFile.isEmpty()) {
                 byte[] bytes = imageFile.getBytes();
-                Path path = Paths.get("/home/ubuntu/" + UPLOAD_DIR + "dish" + saved.getId());
-//                Path path = Paths.get(UPLOAD_DIR + "dish" + saved.getId());
+//                Path path = Paths.get("/home/ubuntu/" + UPLOAD_DIR + "dish" + saved.getId());
+                Path path = Paths.get(UPLOAD_DIR + "dish" + saved.getId());
                 System.out.println(path);
                 Files.write(path, bytes);
                 System.out.println("Files were written");
@@ -202,8 +222,8 @@ public class DishController {
 
         if (!imageFile.isEmpty()) {
             byte[] bytes = imageFile.getBytes();
-                Path path = Paths.get("/home/ubuntu/" + UPLOAD_DIR + "dish" + dish.getId());
-//            Path path = Paths.get(UPLOAD_DIR + "dish" + dish.getId());
+//                Path path = Paths.get("/home/ubuntu/" + UPLOAD_DIR + "dish" + dish.getId());
+            Path path = Paths.get(UPLOAD_DIR + "dish" + dish.getId());
             System.out.println(path);
             Files.write(path, bytes);
             System.out.println("Files were written");
