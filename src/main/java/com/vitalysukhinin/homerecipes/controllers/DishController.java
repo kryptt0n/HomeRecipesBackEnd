@@ -133,22 +133,24 @@ public class DishController {
             comment.setDish(dish.get());
             System.out.println(comment.getUser());
 
-            if (comment.getUser() != null && comment.getUser().getUsername() == null) {
-                return ResponseEntity.badRequest().build();
-            }
-            Optional<User> user = userRepository.findById(comment.getUser().getUsername());
+            if (comment.getUser() != null) {
 
-            if (user.isPresent()) {
-                comment.setUser(user.get());
-                Comment savedComment = commentRepository.save(comment);
-                URI uri = URI.create(ServletUriComponentsBuilder
-                        .fromCurrentContextPath().path("/comments/" + savedComment.getId())
-                        .toUriString());
-                return ResponseEntity.created(uri).build();
-            } else {
-                return ResponseEntity.badRequest().build();
-            }
+                if (comment.getUser().getUsername() == null)
+                    return ResponseEntity.badRequest().build();
 
+                Optional<User> user = userRepository.findById(comment.getUser().getUsername());
+
+                if (user.isPresent()) {
+                    comment.setUser(user.get());
+                } else {
+                    return ResponseEntity.badRequest().build();
+                }
+            }
+            Comment savedComment = commentRepository.save(comment);
+            URI uri = URI.create(ServletUriComponentsBuilder
+                    .fromCurrentContextPath().path("/comments/" + savedComment.getId())
+                    .toUriString());
+            return ResponseEntity.created(uri).build();
         } else {
             return ResponseEntity.notFound().build();
         }
