@@ -65,7 +65,6 @@ public class UserController {
     public ResponseEntity<UserResponse> userByUsername(@PathVariable String username) {
         Optional<User> found = userRepository.findByUsername(username);
         if (found.isPresent()) {
-            User user = found.get();
             UserResponse userResponse = new UserResponse(username);
             return new ResponseEntity<>(userResponse, HttpStatus.OK);
         } else {
