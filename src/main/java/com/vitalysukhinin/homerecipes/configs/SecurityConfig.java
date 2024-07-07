@@ -12,6 +12,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -35,12 +36,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth ->
-                auth.requestMatchers(HttpMethod.POST, "/api/users", "/api/dishes/comments").permitAll()
+                auth.requestMatchers(HttpMethod.POST, "/api/users", "/api/auth-jwt", "/api/dishes/comments").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/dishes", "/api/dishes/**","/dishes/**",
                         "/api/users/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .anyRequest().authenticated())
         .httpBasic(Customizer.withDefaults())
+        .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
         .csrf(AbstractHttpConfigurer::disable);
         return http.build();
     }
